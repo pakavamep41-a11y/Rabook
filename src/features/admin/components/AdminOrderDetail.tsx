@@ -130,7 +130,7 @@ export default function AdminOrderDetail() {
                       <div className="flex flex-col gap-4 animate-fade-in text-slate-800">
                          <div className="bg-amber-50 border border-amber-200 p-4 rounded-xl flex items-start gap-3 text-amber-800">
                             <AlertCircle className="w-5 h-5 shrink-0 mt-0.5" />
-                            <p className="text-xs font-medium leading-relaxed">این یادداشت‌ها تنها برای پرسنل کارخانه و انبار قابل مشاهده هستند و مشتری هیچ دیدی به آن‌ها ندارد.</p>
+                            <p className="text-xs font-medium leading-relaxed">این یادداشت‌ها تنها برای پرسنل انتشارات قابل مشاهده هستند و مشتری هیچ دیدی به آن‌ها ندارد.</p>
                          </div>
                          <textarea rows={4} placeholder="نوشتن یادداشت جدید..." className="w-full p-4 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-amber-500/20 focus:border-amber-500 transition-all resize-none"></textarea>
                          <button className="self-end px-6 py-2 bg-amber-500 text-white text-xs font-bold rounded-xl flex items-center gap-2 hover:bg-amber-600 transition-colors shadow-sm">

@@ -35,7 +35,7 @@ export default function CartPage() {
           <ShoppingBag className="w-10 h-10" />
         </div>
         <div className="flex flex-col gap-2">
-          <h2 className="text-xl font-bold text-slate-800">سبد خرید شما trống است</h2>
+          <h2 className="text-xl font-bold text-slate-800">سبد خرید شما خالی است</h2>
           <p className="text-xs text-slate-400 leading-relaxed">
             محصولات مورد نیاز خود را پیکربندی کرده و جهت استعلام زنده قیمت به سبد خرید انتقال دهید.
           </p>

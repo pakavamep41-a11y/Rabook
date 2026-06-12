@@ -2,7 +2,7 @@ import { useState, FormEvent, useEffect, useRef } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { useStore } from "../../../lib/store";
 import { api } from "../../../lib/api";
-import { Key, Smartphone, Sparkles, User, CircleUser } from "lucide-react";
+import { Key, Smartphone, Sparkles, User, CircleUser, Flower2 } from "lucide-react";
 import { Helmet } from "react-helmet-async";
 
 export default function LoginRegister() {
@@ -106,8 +106,8 @@ export default function LoginRegister() {
   const handleQuickLogin = async (userType: "client" | "admin" | "staff") => {
     setIsSubmitting(true);
     try {
-      const targetEmail = userType === "admin" ? "admin@example.com" : userType === "staff" ? "staff@example.com" : "client@example.com";
-      const res = await api.post("/auth/login", { email: targetEmail, password: "password123" });
+      const targetEmail = userType === "admin" ? "admin@print.ir" : userType === "staff" ? "staff@print.ir" : "ali@example.com";
+      const res = await api.post("/auth/login", { email: targetEmail, password: "password" });
       login(res.data.user, res.data.token);
       showAlert(`ورود موفقیت‌آمیز به عنوان ${res.data.user.name}`, "success");
       navigate(returnTo);
@@ -127,8 +127,8 @@ export default function LoginRegister() {
           <div className="absolute inset-0 bg-gradient-to-r from-emerald-600/30 via-transparent to-transparent opacity-60" />
           <div className="relative z-10 flex flex-col gap-1.5 text-center items-center">
             <h2 className="text-lg font-black tracking-tight flex items-center justify-center gap-2">
-              <Sparkles className="text-emerald-400 w-5 h-5" />
-              <span>پرتال چاپخانه نقش و نگار</span>
+              <Flower2 className="text-emerald-400 w-5 h-5" />
+              <span>پرتال انتشارات رابوک</span>
             </h2>
             <p className="text-[10px] text-slate-400 leading-relaxed font-mono">
               ورود به حساب کاربری
@@ -231,7 +231,7 @@ export default function LoginRegister() {
                     type="email" 
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
-                    placeholder="example@mail.com"
+                    placeholder="ali@example.com"
                     required
                     className="p-3 ps-10 border border-slate-200 rounded-xl text-xs font-mono w-full focus:ring-1 focus:ring-emerald-500 focus:outline-none"
                   />

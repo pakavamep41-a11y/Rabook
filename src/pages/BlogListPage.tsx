@@ -19,6 +19,23 @@ export default function BlogListPage() {
     <div className="flex flex-col gap-12 max-w-7xl mx-auto w-full">
       <Helmet>
         <title>وبلاگ و مقالات آموزشی | چاپخانه</title>
+        <meta name="description" content="جدیدترین مقالات، آموزش‌ها و اخبار دنیای چاپ و طراحی" />
+        <meta property="og:title" content="وبلاگ و مقالات آموزشی | چاپخانه" />
+        <meta property="og:type" content="blog" />
+        {posts && (
+          <script type="application/ld+json">
+            {JSON.stringify({
+              "@context": "https://schema.org",
+              "@type": "ItemList",
+              "itemListElement": posts.map((post, index) => ({
+                "@type": "ListItem",
+                "position": index + 1,
+                "url": `${window.location.origin}/blog/${post.slug}`,
+                "name": post.title
+              }))
+            })}
+          </script>
+        )}
       </Helmet>
 
       {/* Header */}

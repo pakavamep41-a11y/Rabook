@@ -33,7 +33,7 @@ export default function CMSPageLoader({ defaultSlug }: { defaultSlug?: string })
     return (
       <div className="flex flex-col items-center justify-center py-32 gap-6">
         <Helmet>
-          <title>صفحه یافت نشد | چاپخانه نقش و نگار</title>
+          <title>صفحه یافت نشد | انتشارات رابوک</title>
         </Helmet>
         <span className="text-slate-200 text-6xl font-black font-mono">404</span>
         <h1 className="text-2xl font-extrabold text-slate-800">صفحه‌ای که به دنبال آن بودید یافت نشد!</h1>
@@ -48,8 +48,30 @@ export default function CMSPageLoader({ defaultSlug }: { defaultSlug?: string })
   return (
     <div className="w-full flex justify-center">
       <Helmet>
-        <title>{page.seo?.title || `${page.title} | چاپخانه نقش و نگار`}</title>
+        <title>{page.seo?.title || `${page.title} | انتشارات رابوک`}</title>
         {page.seo?.description && <meta name="description" content={page.seo.description} />}
+        <meta property="og:title" content={page.seo?.title || page.title} />
+        {page.seo?.description && <meta property="og:description" content={page.seo.description} />}
+        <meta property="og:type" content="website" />
+        <meta name="twitter:card" content="summary_large_image" />
+
+        <script type="application/ld+json">
+          {JSON.stringify({
+            "@context": "https://schema.org",
+            "@type": "WebPage",
+            "name": page.title,
+            "description": page.seo?.description || "",
+            "url": window.location.href,
+            "publisher": {
+              "@type": "Organization",
+              "name": "انتشارات رابوک",
+              "logo": {
+                "@type": "ImageObject",
+                "url": "https://placehold.co/200x50/emerald/white?text=Logo"
+              }
+            }
+          })}
+        </script>
       </Helmet>
       
       <BlockRenderer blocks={page.blocks} />

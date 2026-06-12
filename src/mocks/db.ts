@@ -2,6 +2,7 @@ import { Category, Product, User, Order, ChatSession, CMSMenu, CMSSlider, CMSPag
 
 export const users: User[] = [
   { id: "1", name: "مدیر سیستم", email: "admin@print.ir", phone: "09120000000", role: "admin" },
+  { id: "1_2", name: "پرسنل پشتیبانی", email: "staff@print.ir", phone: "09120000001", role: "staff" },
   { id: "2", name: "علی حسینی", email: "ali@example.com", phone: "09121111111", role: "customer" },
   { id: "3", name: "مریم رضایی", email: "maryam@example.com", phone: "09122222222", role: "customer" },
 ];
@@ -167,8 +168,8 @@ export const cmsPages: CMSPage[] = [
         type: "hero_slider",
         props: {
           slides: [
-            { imageUrl: "https://images.unsplash.com/photo-1596524430615-b46475ddff6e?auto=format&fit=crop&w=1200&q=80", title: "چاپ افست با کیفیت", linkUrl: "/catalog" },
-            { imageUrl: "https://images.unsplash.com/photo-1572044162444-ad60f128bdea?auto=format&fit=crop&w=1200&q=80", title: "عصر جدید چاپ دیجیتال", linkUrl: "/catalog" }
+            { imageUrl: "https://images.unsplash.com/photo-1596524430615-b46475ddff6e?auto=format&fit=crop&w=1200&q=80", title: "چاپ افست با کیفیت", linkUrl: "/products" },
+            { imageUrl: "https://images.unsplash.com/photo-1572044162444-ad60f128bdea?auto=format&fit=crop&w=1200&q=80", title: "عصر جدید چاپ دیجیتال", linkUrl: "/products" }
           ]
         },
         order: 1
@@ -195,11 +196,17 @@ export const cmsPages: CMSPage[] = [
         type: "banner_row",
         props: {
           banners: [
-            { imageUrl: "https://images.unsplash.com/photo-1626785774573-4b799315345d?auto=format&fit=crop&w=600&q=80", title: "تخفیف ویژه سربرگ", linkUrl: "/catalog/letterheads" },
+            { imageUrl: "https://images.unsplash.com/photo-1626785774573-4b799315345d?auto=format&fit=crop&w=600&q=80", title: "تخفیف ویژه سربرگ", linkUrl: "/c/letterheads" },
             { imageUrl: "https://images.unsplash.com/photo-1563206767-5b18f218e8de?auto=format&fit=crop&w=600&q=80", title: "ارسال رایگان" }
           ]
         },
         order: 4
+      },
+      {
+        id: "bx",
+        type: "latest_blogs",
+        props: {},
+        order: 5
       },
       {
         id: "b5",
@@ -240,7 +247,8 @@ export const cmsMenus: CMSMenu[] = [
     id: "header", location: "header", items: [
       { id: "h1", label: "صفحه اصلی", url: "/", order: 1 },
       { id: "h2", label: "محصولات", url: "/products", order: 2 },
-      { id: "h3", label: "راهنمای طراحی", url: "/page/design-guidelines", order: 3 },
+      { id: "h3", label: "درباره ما", url: "/about-us", order: 3 },
+      { id: "h4", label: "وبلاگ", url: "/blog", order: 4 },
     ]
   }
 ];

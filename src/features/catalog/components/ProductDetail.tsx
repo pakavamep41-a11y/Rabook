@@ -10,8 +10,9 @@ import { calculatePrice, SelectionState } from "../pricing";
 import { ArrowLeft, Clock, ShieldCheck, Tag, UploadCloud, FileText, ShoppingBag, Trash2, HelpCircle, FileImage, Info, PenTool } from "lucide-react";
 import DOMPurify from "dompurify";
 
-export default function ProductDetail() {
-  const { id: productSlug } = useParams<{ id: string }>();
+export default function ProductDetail({ productId }: { productId?: string }) {
+  const params = useParams<{ id: string }>();
+  const productSlug = productId || params.id;
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const designIdParams = searchParams.get("designId");
@@ -340,6 +341,31 @@ export default function ProductDetail() {
       <Helmet>
         <title>{product.title} | سفارش چاپ آنلاین</title>
         <meta name="description" content={product.excerpt} />
+        <meta property="og:title" content={`${product.title} | چاپخانه`} />
+        <meta property="og:description" content={product.excerpt} />
+        {product.coverImage && <meta property="og:image" content={product.coverImage} />}
+        <meta property="og:type" content="product" />
+        <meta name="twitter:card" content="summary_large_image" />
+
+        <script type="application/ld+json">
+          {JSON.stringify({
+            "@context": "https://schema.org/",
+            "@type": "Product",
+            "name": product.title,
+            "image": product.coverImage ? [product.coverImage] : [],
+            "description": product.excerpt,
+            "sku": product.id,
+            "offers": {
+              "@type": "AggregateOffer",
+              "url": window.location.href,
+              "priceCurrency": "IRR",
+              "lowPrice": priceDetails ? priceDetails.baseUnitPrice * 10 : 0,
+              "highPrice": priceDetails ? priceDetails.totalPrice * 10 : 0,
+              "offerCount": "1",
+              "availability": "https://schema.org/InStock"
+            }
+          })}
+        </script>
       </Helmet>
 
       {/* Return & Breadcrumb */}

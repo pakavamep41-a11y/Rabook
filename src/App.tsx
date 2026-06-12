@@ -40,6 +40,8 @@ const SearchPage = lazy(() => import("./pages/SearchPage"));
 const PriceListPage = lazy(() => import("./pages/PriceListPage"));
 const BlogListPage = lazy(() => import("./pages/BlogListPage"));
 const BlogDetailPage = lazy(() => import("./pages/BlogDetailPage"));
+const AboutUsPage = lazy(() => import("./pages/AboutUsPage"));
+const QuickOrderPage = lazy(() => import("./pages/QuickOrderPage"));
 
 const WalletPage = lazy(() => import("./features/account/components/WalletPage"));
 const ProfilePage = lazy(() => import("./features/account/components/ProfilePage"));
@@ -151,14 +153,18 @@ export default function App() {
                         {/* CMS Public Storefront Route Tree */}
                         <Route path="/" element={<CMSPageLoader defaultSlug="home" />} />
                         <Route path="/p/:slug" element={<CMSPageLoader />} />
+                        <Route path="/page/:slug" element={<CMSPageLoader />} />
                         
                         {/* Catalog & eCommerce */}
                         <Route path="/catalog" element={<CatalogHome />} />
+                        <Route path="/products" element={<CatalogHome />} />
                         <Route path="/c/:slug" element={<CategoryPage />} />
                         <Route path="/search" element={<SearchPage />} />
                         <Route path="/price-list" element={<PriceListPage />} />
                         <Route path="/blog" element={<BlogListPage />} />
                         <Route path="/blog/:slug" element={<BlogDetailPage />} />
+                        <Route path="/about-us" element={<AboutUsPage />} />
+                        <Route path="/quick-order" element={<QuickOrderPage />} />
                         <Route path="/product/:id" element={<ProductDetail />} />
                         <Route path="/cart" element={<CartPage />} />
                         <Route path="/checkout" element={<CheckoutWizard />} />

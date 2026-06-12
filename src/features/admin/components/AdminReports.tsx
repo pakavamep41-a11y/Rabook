@@ -19,7 +19,7 @@ export default function AdminReports() {
        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div className="flex flex-col">
             <h1 className="text-2xl font-black text-slate-800">گزارشات و آمار فروش</h1>
-            <span className="text-xs text-slate-500 font-bold mt-1">بررسی عملکرد کارخانه چاپ</span>
+            <span className="text-xs text-slate-500 font-bold mt-1">بررسی عملکرد انتشارات</span>
           </div>
           <div className="flex gap-2">
             <button className="px-4 py-2 bg-white border border-slate-200 hover:bg-slate-50 text-slate-700 text-xs font-bold rounded-xl flex items-center gap-2 transition-colors">

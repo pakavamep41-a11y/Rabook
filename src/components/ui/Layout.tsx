@@ -4,12 +4,13 @@ import { AlertCircle, UserCheck } from "lucide-react";
 import AnnouncementBar from "../layout/AnnouncementBar";
 import Header from "../layout/Header";
 import Footer from "../layout/Footer";
+import FloatingSupport from "../layout/FloatingSupport";
 
 export default function Layout({ children }: { children: React.ReactNode }) {
   const { alert, hideAlert, impersonatedUser, stopImpersonation } = useStore();
 
   return (
-    <div className="min-h-screen flex flex-col font-sans selection:bg-emerald-100 selection:text-emerald-900 pb-16 md:pb-0">
+    <div className="min-h-screen flex flex-col font-sans selection:bg-emerald-100 selection:text-emerald-900 pb-0">
       {impersonatedUser && (
         <div className="bg-amber-500 text-white p-3 text-xs font-bold flex items-center justify-center gap-3 sticky top-0 z-[60]">
           <UserCheck className="w-5 h-5" />
@@ -49,6 +50,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
       </main>
 
       <Footer />
+      <FloatingSupport />
     </div>
   );
 }

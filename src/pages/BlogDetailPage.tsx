@@ -55,6 +55,28 @@ export default function BlogDetailPage() {
       <Helmet>
         <title>{post.title} | وبلاگ چاپخانه</title>
         <meta name="description" content={post.excerpt} />
+        {post.tags && <meta name="keywords" content={post.tags.join(", ")} />}
+        <meta property="og:title" content={post.title} />
+        <meta property="og:description" content={post.excerpt} />
+        {post.coverImage && <meta property="og:image" content={post.coverImage} />}
+        <meta property="og:type" content="article" />
+        <meta name="twitter:card" content="summary_large_image" />
+        
+        <script type="application/ld+json">
+          {JSON.stringify({
+            "@context": "https://schema.org",
+            "@type": "BlogPosting",
+            "headline": post.title,
+            "image": post.coverImage ? [post.coverImage] : [],
+            "datePublished": post.createdAt,
+            "dateModified": post.createdAt,
+            "author": [{
+                "@type": "Person",
+                "name": post.author,
+            }],
+            "description": post.excerpt
+          })}
+        </script>
       </Helmet>
 
       {/* Breadcrumbs */}

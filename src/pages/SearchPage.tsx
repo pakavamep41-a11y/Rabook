@@ -21,21 +21,17 @@ export default function SearchPage() {
   });
 
   const { data: allProducts, isLoading } = useQuery<Product[]>({
-    queryKey: ["products"],
+    queryKey: ["products", q],
     queryFn: async () => {
-      const res = await api.get("/products");
+      const res = await api.get("/products", { params: { search: q || "", limit: 100 } });
       return res.data.data;
     }
   });
 
-  // Client-side search and filtering
+  // Client-side category filtering
   const filteredProducts = useMemo(() => {
     if (!allProducts) return [];
     let list = allProducts;
-    
-    if (q) {
-      list = list.filter(p => p.title.includes(q) || p.description.includes(q));
-    }
     
     if (categoryFilter !== "all" && categories) {
        // get category and its children
@@ -46,7 +42,7 @@ export default function SearchPage() {
     }
     
     return list;
-  }, [allProducts, q, categoryFilter, categories]);
+  }, [allProducts, categoryFilter, categories]);
 
   const updateFilter = (catId: string) => {
     const newParams = new URLSearchParams(searchParams);

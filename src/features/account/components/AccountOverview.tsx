@@ -22,7 +22,7 @@ export default function AccountOverview() {
   const orders = ordersPage?.data || [];
   
   // Mocks
-  const walletBalance = 0;
+  const walletBalance = 2500000;
   const stats = {
      active: 2,
      pendingPayment: 1,

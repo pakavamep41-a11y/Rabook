@@ -26,7 +26,7 @@ export const handlers = [
           content: "سلام، فایل شما دارای حاشیه امن کافی نیست. لطفا از هر طرف نیم سانت فاصله بگذارید.",
           sessionId: `sess_${orderId}`,
           senderId: "admin_1",
-          senderName: "پشتیبانی نقش و نگار",
+          senderName: "پشتیبانی انتشارات رابوک",
           senderRole: "admin",
           createdAt: new Date(Date.now() - 80000000).toISOString(),
           seen: true

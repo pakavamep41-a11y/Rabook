@@ -83,6 +83,23 @@ export default function CategoryPage() {
       <Helmet>
         <title>{category.title} | چاپخانه آنلاین</title>
         {category.description && <meta name="description" content={category.description} />}
+        <meta property="og:title" content={`${category.title} | چاپخانه آنلاین`} />
+        {category.description && <meta property="og:description" content={category.description} />}
+        <meta property="og:type" content="website" />
+        {products && (
+          <script type="application/ld+json">
+            {JSON.stringify({
+              "@context": "https://schema.org",
+              "@type": "ItemList",
+              "itemListElement": products.map((product, index) => ({
+                "@type": "ListItem",
+                "position": index + 1,
+                "url": `${window.location.origin}/product/${product.slug || product.id}`,
+                "name": product.title
+              }))
+            })}
+          </script>
+        )}
       </Helmet>
 
       {/* Breadcrumbs */}

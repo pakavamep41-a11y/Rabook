@@ -1,11 +1,70 @@
 import React from "react";
-import { CMSBlock, Product } from "../../types";
+import { CMSBlock, Product, BlogPost } from "../../types";
 import { Link } from "react-router-dom";
 import DOMPurify from "dompurify";
-import { Star, PlayCircle, ChevronLeft } from "lucide-react";
+import { Star, PlayCircle, ChevronLeft, Calendar, User, ArrowLeft } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import { api } from "../../lib/api";
 import ProductCard from "../ui/ProductCard";
+
+function LatestBlogs({ block }: { block: CMSBlock }) {
+  const { data: posts } = useQuery<BlogPost[]>({
+    queryKey: ["latestBlogs"],
+    queryFn: async () => {
+      const res = await api.get("/blog");
+      return (res.data as BlogPost[]).slice(0, 3);
+    }
+  });
+
+  return (
+    <section className="flex flex-col gap-6 py-8">
+      <div className="flex items-center justify-between border-b border-slate-100 pb-4">
+        <h2 className="text-2xl font-black text-slate-800 flex items-center gap-2">
+           <span className="w-2 h-8 bg-emerald-500 rounded-full inline-block"></span>
+           جدیدترین مقالات وبلاگ
+        </h2>
+        <Link to="/blog" className="text-sm font-bold text-emerald-600 hover:text-emerald-700 flex items-center gap-1 group">
+           مشاهده همه <ArrowLeft className="w-4 h-4 transition-transform group-hover:-translate-x-1" />
+        </Link>
+      </div>
+      
+      {!posts ? (
+         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+           {[...Array(3)].map((_, i) => (
+             <div key={i} className="animate-pulse bg-slate-100 rounded-3xl aspect-[4/3]" />
+           ))}
+         </div>
+      ) : posts.length === 0 ? (
+         <div className="p-8 text-center text-slate-400 text-sm bg-slate-50 rounded-3xl border border-slate-100">مقاله‌ای یافت نشد.</div>
+      ) : (
+         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+           {posts.map(post => {
+              const formattedDate = new Intl.DateTimeFormat('fa-IR').format(new Date(post.createdAt));
+              return (
+                 <Link key={post.id} to={`/blog/${post.slug}`} className="group flex flex-col gap-4">
+                    <div className="relative aspect-[4/3] rounded-3xl overflow-hidden bg-slate-100 shadow-sm border border-slate-100">
+                       <img src={post.coverImage} alt={post.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700 ease-in-out" />
+                       <div className="absolute top-4 end-4 bg-white/90 backdrop-blur-md px-3 py-1 rounded-full text-[10px] font-bold text-slate-700 shadow-sm">
+                          {post.tags?.[0] || 'وبلاگ'}
+                       </div>
+                    </div>
+                    <div className="flex flex-col gap-2">
+                       <div className="flex items-center gap-3 text-[10px] text-slate-500 font-bold">
+                          <span className="flex items-center gap-1"><Calendar className="w-3 h-3 text-emerald-600" /> {formattedDate}</span>
+                          <span className="w-1 h-1 rounded-full bg-slate-300"></span>
+                          <span className="flex items-center gap-1"><User className="w-3 h-3 text-emerald-600" /> {post.author}</span>
+                       </div>
+                       <h3 className="text-base font-bold text-slate-800 line-clamp-2 leading-relaxed group-hover:text-emerald-600 transition-colors">{post.title}</h3>
+                       <p className="text-xs text-slate-500 line-clamp-2 leading-loose">{post.excerpt}</p>
+                    </div>
+                 </Link>
+              );
+           })}
+         </div>
+      )}
+    </section>
+  );
+}
 
 function ProductCarousel({ block }: { block: CMSBlock }) {
   const { categoryId, title } = block.props;
@@ -160,6 +219,8 @@ export default function BlockRenderer({ blocks }: { blocks: CMSBlock[] }) {
     <div className="flex flex-col gap-16 w-full">
       {sortedBlocks.map(block => {
         switch (block.type) {
+          case "latest_blogs":
+             return <LatestBlogs key={block.id} block={block} />;
           case "hero_slider":
             return <HeroSlider key={block.id} block={block} />;
           case "category_grid":

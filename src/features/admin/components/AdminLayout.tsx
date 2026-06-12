@@ -49,11 +49,11 @@ export default function AdminLayout() {
       )}
       <div className="flex flex-1 relative">
         {/* Sidebar */}
-      <aside className={`fixed inset-y-0 right-0 z-50 bg-slate-900 text-slate-300 w-64 transition-transform duration-300 ${sidebarOpen ? "translate-x-0" : "translate-x-full lg:translate-x-0"} flex flex-col`}>
+      <aside className={`fixed inset-y-0 right-0 z-50 bg-slate-900 text-slate-300 w-64 transition-transform duration-300 ${sidebarOpen ? "translate-x-0" : "translate-x-full"} flex flex-col`}>
          <div className="h-16 flex items-center justify-center border-b border-slate-800 shrink-0">
-            <span className="text-white font-black text-lg">پنل مدیریت کارخانه</span>
+            <span className="text-white font-black text-lg">پنل مدیریت</span>
          </div>
-         <div className="flex-1 overflow-y-auto py-4 px-3 flex flex-col gap-1 custom-scrollbar">
+         <div className="flex-1 overflow-y-auto py-4 px-3 flex flex-col gap-1 sidebar-scrollbar">
             {SIDEBAR_NAV.map(nav => (
                <Can key={nav.path} perm={nav.perm as any}>
                   <Link 
@@ -84,7 +84,7 @@ export default function AdminLayout() {
       </aside>
 
       {/* Main Content */}
-      <div className={`flex-1 flex flex-col min-h-screen transition-all duration-300 ${sidebarOpen ? "lg:mr-64 mr-0" : "mr-0"}`}>
+      <div className={`flex-1 flex flex-col min-h-screen transition-all duration-300 ${sidebarOpen ? "mr-0 lg:mr-64" : ""}`}>
          <AdminHeader toggleSidebar={() => setSidebarOpen(!sidebarOpen)} />
          
          <main className="flex-1 p-4 md:p-6 lg:p-8 overflow-x-hidden">

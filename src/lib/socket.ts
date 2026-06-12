@@ -37,7 +37,7 @@ class MockSocket {
               type: "text",
               content: "پیام شما دریافت شد. در اسرع وقت پاسخ داده می‌شود.",
               senderId: "admin_1",
-              senderName: "پشتیبانی نقش و نگار",
+              senderName: "پشتیبانی انتشارات رابوک",
               senderRole: "admin",
               sessionId: msg.sessionId,
               createdAt: new Date().toISOString(),

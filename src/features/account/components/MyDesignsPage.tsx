@@ -32,10 +32,10 @@ export default function MyDesignsPage() {
          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
            {designs.map(design => (
              <div key={design.id} className="bg-white border border-slate-200 rounded-2xl overflow-hidden shadow-sm hover:shadow-md transition-shadow flex flex-col">
-                <div className="aspect-[4/3] bg-slate-100 relative overflow-hidden group">
+                 <div className="aspect-[4/3] bg-slate-100 relative overflow-hidden group">
                   <img src={design.thumb} alt={design.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform" />
                   <div className="absolute inset-0 bg-slate-900/40 opacity-0 group-hover:opacity-100 flex items-center justify-center transition-opacity text-white text-xs font-bold gap-2 backdrop-blur-sm">
-                    <button className="p-2 hover:bg-white/20 rounded-lg transition-colors"><Edit2 className="w-5 h-5" /></button>
+                    <button onClick={() => window.location.href=`/editor/prod-bc-lam-glossy`} className="p-2 hover:bg-white/20 rounded-lg transition-colors" title="ویرایش"><Edit2 className="w-5 h-5" /></button>
                   </div>
                 </div>
                 <div className="p-4 flex flex-col flex-1 gap-2">
@@ -44,11 +44,15 @@ export default function MyDesignsPage() {
                    <div className="flex mt-auto pt-4 items-center justify-between text-[10px] text-slate-400 font-mono">
                       <span>{formatJalali(design.date).split(' ')[0]}</span>
                       <div className="flex gap-1">
-                         <button className="flex items-center gap-1 bg-emerald-600 text-white px-2 py-1.5 rounded-lg hover:bg-emerald-700 transition-colors shadow-sm font-sans font-bold">
+                         <button onClick={() => showAlert("طرح به سبد خرید اضافه شد.", "success")} className="flex items-center gap-1 bg-emerald-600 text-white px-2 py-1.5 rounded-lg hover:bg-emerald-700 transition-colors shadow-sm font-sans font-bold">
                             <ShoppingBag className="w-3.5 h-3.5" />
                             سفارش
                          </button>
-                         <button onClick={() => handleDelete(design.id)} className="p-1.5 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition-colors text-slate-400">
+                         <button onClick={() => {
+                            if (window.confirm("آیا از حذف این طرح اطمینان دارید؟")) {
+                                handleDelete(design.id);
+                            }
+                         }} className="p-1.5 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition-colors text-slate-400">
                            <Trash2 className="w-3.5 h-3.5" />
                          </button>
                       </div>

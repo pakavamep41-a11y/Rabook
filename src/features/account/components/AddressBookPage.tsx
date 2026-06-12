@@ -6,7 +6,7 @@ export default function AddressBookPage() {
   const { showAlert } = useStore();
   const [addresses, setAddresses] = useState([
     { id: 1, title: "خانه", address: "تهران، میدان ونک، خیابان گاندی، کوچه پنجم، پلاک ۵، واحد ۲", postalCode: "1983944331", receiver: "علیرضا احمدی", phone: "09123456789", isDefault: true },
-    { id: 2, title: "دفتر شرکت", address: "تهران، بلوار میرداماد، مجتمع کامپیوتر پایتخت، طبقه سوم، واحد ۳۰۱", postalCode: "1969766543", receiver: "شرکت نقش و نگار", phone: "02188776655", isDefault: false },
+    { id: 2, title: "دفتر شرکت", address: "تهران، بلوار میرداماد، مجتمع کامپیوتر پایتخت، طبقه سوم، واحد ۳۰۱", postalCode: "1969766543", receiver: "انتشارات رابوک", phone: "02188776655", isDefault: false },
   ]);
 
   const [isFormOpen, setIsFormOpen] = useState(false);

@@ -58,7 +58,7 @@ export default function PriceListPage() {
 
       {/* Print-only Header */}
       <div className="hidden print:flex justify-between items-center border-b-2 border-black pb-4 mb-4">
-         <h1 className="text-xl font-black">چاپخانه نقش و نگار - لیست قیمت</h1>
+         <h1 className="text-xl font-black">انتشارات رابوک - لیست قیمت</h1>
          <div className="text-xs font-mono font-bold">بروزرسانی: ۱۴۰۳/۰۴/۱۵</div>
       </div>
 
