@@ -1,0 +1,6 @@
+{
+  "name": "چاپخانه آنلاین",
+  "description": "سامانه سفارش آنلاین محصولات چاپی و کارت ویزیت با پشتیبانی مستقیم از زبان فارسی و راست‌چین",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
