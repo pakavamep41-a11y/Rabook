@@ -1,441 +1,273 @@
-import { http, HttpResponse } from "msw";
-import { 
-  getMockUsers, 
-  saveMockUsers, 
-  getMockOrders, 
-  saveMockOrders, 
-  getMockChatSessions, 
-  saveMockChatSessions, 
-  mockProducts 
-} from "./db";
-import { Order, OrderItem, ChatMessage, ChatSession, User } from "../types";
-
-const BASE_URL = "/api";
+import { http, HttpResponse, delay } from "msw";
+import { users, categories, products, orders, chatSessions, cmsPages, cmsMenus, sliders, faqs, blogPosts } from "./db";
+import { PaginatedResponse, Product, Category, Order, ChatSession, User } from "../types";
 
 export const handlers = [
-  // ==========================================
-  // CATALOG DOMAIN HANDLERS
-  // ==========================================
-  
-  // Get dynamic catalog products list
-  http.get(`${BASE_URL}/catalog/products`, () => {
-    return HttpResponse.json(mockProducts);
-  }),
-
-  // Calculate pricing based on options and quantity
-  http.post(`${BASE_URL}/catalog/calculate-price`, async ({ request }) => {
-    try {
-      const { productId, options, quantity } = (await request.json()) as {
-        productId: string;
-        options: { [key: string]: string };
-        quantity: number;
-      };
-
-      const product = mockProducts.find((p) => p.id === productId);
-      if (!product) {
-        return HttpResponse.json({ message: "محصول پیدا نشد" }, { status: 404 });
-      }
-
-      // Start with product base price
-      let unitPrice = product.basePrice;
-
-      // Add factors from each selected option
-      Object.entries(options).forEach(([optionId, val]) => {
-        const option = product.options.find((o) => o.id === optionId);
-        if (option) {
-          const optValue = option.values.find((v) => v.value === val);
-          if (optValue) {
-            unitPrice += optValue.priceFactor;
-          }
+  // Chat endpoint
+  http.get("/api/chat/:orderId", async ({ params }) => {
+    await delay(300);
+    const { orderId } = params;
+    return HttpResponse.json({
+      sessionId: `sess_${orderId}`,
+      messages: [
+        {
+          id: "m1",
+          type: "status_change",
+          sessionId: `sess_${orderId}`,
+          senderId: "system",
+          senderRole: "admin",
+          createdAt: new Date(Date.now() - 86400000).toISOString(),
+          oldStatus: "registered",
+          newStatus: "in_review"
+        },
+        {
+          id: "m2",
+          type: "text",
+          content: "سلام، فایل شما دارای حاشیه امن کافی نیست. لطفا از هر طرف نیم سانت فاصله بگذارید.",
+          sessionId: `sess_${orderId}`,
+          senderId: "admin_1",
+          senderName: "پشتیبانی نقش و نگار",
+          senderRole: "admin",
+          createdAt: new Date(Date.now() - 80000000).toISOString(),
+          seen: true
         }
-      });
-
-      // Simple volume discount formula
-      let discount = 0;
-      if (quantity >= 500) {
-        discount = 0.15; // 15% discount for bulk
-      } else if (quantity >= 200) {
-        discount = 0.10; // 10% discount
-      } else if (quantity >= 100) {
-        discount = 0.05; // 5% discount
-      }
-
-      unitPrice = Math.round(unitPrice * (1 - discount));
-      const totalPrice = unitPrice * quantity;
-
-      return HttpResponse.json({
-        unitPrice,
-        totalPrice,
-        discountPercent: discount * 100,
-        basePrice: product.basePrice,
-      });
-    } catch {
-      return HttpResponse.json({ message: "پارامترهای نادرست" }, { status: 400 });
-    }
+      ]
+    });
+  }),
+  // Authentication
+  http.post("/api/auth/otp/send", async ({ request }) => {
+    await delay(500);
+    const { phone } = await request.json() as any;
+    if (!phone) return HttpResponse.json({ error: "شماره موبایل الزامی است." }, { status: 400 });
+    return HttpResponse.json({ message: "کد تایید ارسال شد." });
   }),
 
-  // ==========================================
-  // AUTH DOMAIN HANDLERS
-  // ==========================================
-
-  // User Authentication / Login
-  http.post(`${BASE_URL}/auth/login`, async ({ request }) => {
-    try {
-      const { email, password } = (await request.json()) as { email: string; password: string };
-      
-      const users = getMockUsers();
-      // Match password or look for defaults
-      let mathedUser: User | undefined;
-      
-      if (email === "admin@example.com") {
-        mathedUser = users.find((u) => u.email === "admin@example.com");
-      } else if (email === "client@example.com") {
-        mathedUser = users.find((u) => u.email === "client@example.com");
-      } else {
-        // Fallback or dynamic user
-        mathedUser = users.find((u) => u.email === email);
-      }
-
-      if (!mathedUser) {
-        return HttpResponse.json(
-          { message: "کاربری با این مشخصات یافت نشد یا رمز عبور اشتباه است." },
-          { status: 400 }
-        );
-      }
-
-      const dummyToken = `jwt-mock-token-${mathedUser.role}-${Date.now()}`;
-      return HttpResponse.json({
-        user: mathedUser,
-        token: dummyToken,
-        message: "ورود با موفقیت انجام شد."
-      });
-    } catch {
-      return HttpResponse.json({ message: "ساختار درخواست نامعتبر است" }, { status: 400 });
-    }
-  }),
-
-  // User Account Registration
-  http.post(`${BASE_URL}/auth/register`, async ({ request }) => {
-    try {
-      const { name, email, phone } = (await request.json()) as {
-        name: string;
-        email: string;
-        phone: string;
-      };
-
-      const users = getMockUsers();
-      if (users.some((u) => u.email === email)) {
-        return HttpResponse.json(
-          { message: "این ایمیل قبلاً در سامانه ثبت شده است." },
-          { status: 400 }
-        );
-      }
-
-      const newUser: User = {
-        id: `usr-${Date.now()}`,
-        name,
-        email,
-        phone,
-        role: "client",
-        avatar: `https://api.dicebear.com/7.x/adventurer/svg?seed=${name}`,
-      };
-
-      users.push(newUser);
-      saveMockUsers(users);
-
-      const dummyToken = `jwt-mock-token-client-${Date.now()}`;
-      return HttpResponse.json({
-        user: newUser,
-        token: dummyToken,
-        message: "ثبت‌نام با موفقیت انجام شد."
-      });
-    } catch {
-      return HttpResponse.json({ message: "داده‌های ورودی نادرست است" }, { status: 400 });
-    }
-  }),
-
-  // Token refresh handler
-  http.post(`${BASE_URL}/auth/refresh`, async ({ request }) => {
-    const authHeader = request.headers.get("Authorization");
-    if (!authHeader || !authHeader.startsWith("Bearer ")) {
-      return HttpResponse.json({ message: "توکن نامعتبر است" }, { status: 401 });
+  http.post("/api/auth/otp/verify", async ({ request }) => {
+    await delay(500);
+    const { phone, code } = await request.json() as any;
+    if (code !== "11111") {
+      return HttpResponse.json({ error: "کد وارد شده صحیح نیست." }, { status: 400 });
     }
     
-    // Simply return another fresh token
-    const oldToken = authHeader.split(" ")[1];
-    const role = oldToken.includes("admin") ? "admin" : "client";
-    const freshToken = `jwt-mock-token-${role}-${Date.now()}`;
+    // Check if user exists
+    let user = users.find(u => u.phone === phone);
+    if (!user) {
+      user = {
+        id: Math.random().toString(36).substring(7),
+        name: "کاربر جدید",
+        email: "",
+        phone: phone,
+        role: "customer"
+      };
+      users.push(user);
+    }
     
-    return HttpResponse.json({ token: freshToken });
+    return HttpResponse.json({ user, token: "mock-jwt-token", refreshToken: "mock-refresh-token" });
   }),
 
-  // Get active user profile
-  http.get(`${BASE_URL}/auth/me`, ({ request }) => {
-    const authHeader = request.headers.get("Authorization");
-    if (!authHeader || !authHeader.startsWith("Bearer ")) {
-      return HttpResponse.json({ message: "شما وارد نشده‌اید" }, { status: 401 });
+  http.post("/api/auth/login", async ({ request }) => {
+    await delay(500);
+    const { email, password } = await request.json() as any;
+    const user = users.find(u => u.email === email);
+    if (!user) {
+      return HttpResponse.json({ error: "ایمیل یا رمز عبور اشتباه است." }, { status: 401 });
     }
-
-    const token = authHeader.split(" ")[1];
-    const role = token.includes("admin") ? "admin" : "client";
-    const users = getMockUsers();
-    const active = users.find((u) => u.role === role);
-
-    if (!active) {
-      return HttpResponse.json({ message: "کاربر یافت نشد" }, { status: 404 });
-    }
-    return HttpResponse.json(active);
+    return HttpResponse.json({ user, token: "mock-jwt-token" });
   }),
 
-  // ==========================================
-  // ORDERS DOMAIN HANDLERS
-  // ==========================================
+  http.post("/api/auth/register", async ({ request }) => {
+    await delay(500);
+    const body = await request.json() as any;
+    const newUser: User = {
+      id: Math.random().toString(36).substring(7),
+      name: body.name,
+      email: body.email,
+      phone: body.phone,
+      role: "customer"
+    };
+    users.push(newUser);
+    return HttpResponse.json({ user: newUser, token: "mock-jwt-token" });
+  }),
 
-  // Create an order
-  http.post(`${BASE_URL}/orders/create`, async ({ request }) => {
-    try {
-      const authHeader = request.headers.get("Authorization");
-      if (!authHeader) {
-        return HttpResponse.json({ message: "دسترسی غیرمجاز" }, { status: 401 });
-      }
+  // Catalog
+  http.get("/api/categories", async () => {
+    await delay(300);
+    // Return tree structure
+    const level1 = categories.filter(c => c.level === 1);
+    const getChildren = (parentId: string): Category[] => 
+      categories.filter(c => c.parentId === parentId).map(c => ({
+        ...c,
+        children: getChildren(c.id)
+      }));
+    const tree = level1.map(c => ({
+      ...c,
+      children: getChildren(c.id)
+    }));
+    return HttpResponse.json(tree);
+  }),
 
-      const { items, totalAmount, shippingAddress, paymentMethod } = (await request.json()) as {
-        items: Omit<OrderItem, "id">[];
-        totalAmount: number;
-        shippingAddress: string;
-        paymentMethod: string;
-      };
+  http.get("/api/products", async ({ request }) => {
+    await delay(400);
+    const url = new URL(request.url);
+    const categoryId = url.searchParams.get("categoryId");
+    const search = url.searchParams.get("search");
+    const page = parseInt(url.searchParams.get("page") || "1", 10);
+    const limit = parseInt(url.searchParams.get("limit") || "10", 10);
 
-      const token = authHeader.split(" ")[1];
-      const role = token.includes("admin") ? "admin" : "client";
-      const users = getMockUsers();
-      const user = users.find((u) => u.role === role) || users[0];
+    let filtered = [...products];
+    if (categoryId) filtered = filtered.filter(p => p.categoryId === categoryId);
+    if (search) filtered = filtered.filter(p => p.title.includes(search));
 
-      const orders = getMockOrders();
-      const numericalCode = Math.floor(1000 + Math.random() * 9000);
-      
-      const newOrder: Order = {
-        id: `ord-${Date.now()}`,
-        orderNumber: `N-${numericalCode}`,
-        userId: user.id,
-        userName: user.name,
-        items: items.map((i, idx) => ({ ...i, id: `item-${Date.now()}-${idx}` })),
-        totalAmount,
-        status: "pending",
-        createdAt: new Date().toISOString(),
-        shippingAddress,
-        paymentMethod,
-      };
+    const total = filtered.length;
+    const paginated = filtered.slice((page - 1) * limit, page * limit);
 
-      orders.unshift(newOrder); // Add to the front of list
-      saveMockOrders(orders);
+    return HttpResponse.json({
+      data: paginated,
+      total,
+      page,
+      pageSize: limit,
+      totalPages: Math.ceil(total / limit)
+    } as PaginatedResponse<Product>);
+  }),
 
-      return HttpResponse.json({
-        order: newOrder,
-        message: "سفارش شما با موفقیت ثبت گردید."
+  http.get("/api/products/:id", async ({ params }) => {
+    await delay(300);
+    const product = products.find(p => p.id === params.id || p.slug === params.id);
+    if (!product) return new HttpResponse(null, { status: 404 });
+    return HttpResponse.json(product);
+  }),
+
+  http.post("/api/catalog/calculate-price", async ({ request }) => {
+    await delay(300);
+    const body = await request.json() as any;
+    const product = products.find(p => p.id === body.productId);
+    
+    if (!product) return new HttpResponse(null, { status: 404 });
+
+    let unitPrice = 0;
+    if (product.pricing.type === "tier_table") {
+      unitPrice = product.pricing.tiers[0].unitPrice;
+      // Mock logic: apply price impacts for options
+      Object.entries(body.options || {}).forEach(([optId, val]) => {
+         const option = product.options.find(o => o.id === optId);
+         if (option && option.type === "select") {
+            const ch = option.choices?.find(c => c.value === val);
+            if (ch && ch.priceImpact) unitPrice += ch.priceImpact;
+         }
       });
-    } catch {
-      return HttpResponse.json({ message: "ثبت سفارش با شکست مواجه شد" }, { status: 400 });
+    } else if (product.pricing.type === "area_based" || product.pricing.type === "formula") {
+      unitPrice = (product.pricing as any).basePrice || (product.pricing as any).basePricePerSquareMeter || 50000;
     }
+
+    let discountPercent = body.quantity >= 500 ? 15 : 0;
+    const finalUnitPrice = unitPrice * (1 - discountPercent / 100);
+    const totalPrice = finalUnitPrice * body.quantity;
+
+    return HttpResponse.json({
+      unitPrice: finalUnitPrice,
+      totalPrice,
+      discountPercent,
+      basePrice: unitPrice
+    });
   }),
 
-  // Get all user or system orders (dependent on role)
-  http.get(`${BASE_URL}/orders`, ({ request }) => {
-    const authHeader = request.headers.get("Authorization");
-    if (!authHeader) {
-      return HttpResponse.json({ message: "عدم احراز هویت" }, { status: 401 });
-    }
+  // Orders
+  http.get("/api/orders", async ({ request }) => {
+    await delay(500);
+    const url = new URL(request.url);
+    const customerId = url.searchParams.get("customerId");
+    const admin = url.searchParams.get("admin") === "true"; // just checking caller role theoretically
 
-    const token = authHeader.split(" ")[1];
-    const isAdmin = token.includes("admin");
-    const users = getMockUsers();
-    const currentUser = users.find((u) => u.role === (isAdmin ? "admin" : "client"));
+    let filtered = [...orders];
+    if (customerId) filtered = filtered.filter(o => o.customerId === customerId);
 
-    const orders = getMockOrders();
+    // Simple sorting
+    filtered.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
 
-    if (isAdmin) {
-      // Admin sees everything
-      return HttpResponse.json(orders);
-    } else {
-      // Standard client sees only their orders
-      const userOrders = orders.filter((o) => o.userId === (currentUser?.id || "usr-client"));
-      return HttpResponse.json(userOrders);
-    }
+    return HttpResponse.json({
+      data: filtered,
+      total: filtered.length,
+      page: 1,
+      pageSize: 50,
+      totalPages: 1
+    } as PaginatedResponse<Order>);
   }),
 
-  // Update order status (Admin function)
-  http.patch(`${BASE_URL}/orders/:id/status`, async ({ params, request }) => {
-    try {
-      const { id } = params;
-      const { status } = (await request.json()) as { status: string };
-
-      const orders = getMockOrders();
-      const orderIndex = orders.findIndex((o) => o.id === id);
-
-      if (orderIndex === -1) {
-        return HttpResponse.json({ message: "سفارش یافت نشد" }, { status: 404 });
-      }
-
-      orders[orderIndex].status = status as any;
-      saveMockOrders(orders);
-
-      return HttpResponse.json({
-        order: orders[orderIndex],
-        message: "وضعیت سفارش با موفقیت ویرایش شد."
-      });
-    } catch {
-      return HttpResponse.json({ message: "خطایی پیش آمد" }, { status: 400 });
-    }
+  http.get("/api/orders/:id", async ({ params }) => {
+    await delay(300);
+    const order = orders.find(o => o.id === params.id);
+    if (!order) return new HttpResponse(null, { status: 404 });
+    return HttpResponse.json(order);
   }),
 
-  // Update order tracking code (Admin function)
-  http.patch(`${BASE_URL}/orders/:id/tracking`, async ({ params, request }) => {
-    try {
-      const { id } = params;
-      const { trackingNumber } = (await request.json()) as { trackingNumber: string };
-
-      const orders = getMockOrders();
-      const orderIndex = orders.findIndex((o) => o.id === id);
-
-      if (orderIndex === -1) {
-        return HttpResponse.json({ message: "سفارش یافت نشد" }, { status: 404 });
-      }
-
-      orders[orderIndex].trackingNumber = trackingNumber;
-      orders[orderIndex].status = "shipped";
-      saveMockOrders(orders);
-
-      return HttpResponse.json({
-        order: orders[orderIndex],
-        message: "کد پیگیری مرسوله با موفقیت ثبت شد."
-      });
-    } catch {
-      return HttpResponse.json({ message: "خطایی پیش آمد" }, { status: 400 });
-    }
+  // Chat
+  http.get("/api/orders/:id/chat", async ({ params }) => {
+    await delay(400);
+    const session = chatSessions.find(s => s.orderId === params.id);
+    if (!session) return HttpResponse.json({ messages: [] });
+    return HttpResponse.json(session);
   }),
 
-  // ==========================================
-  // CHAT / MESSAGE DOMAIN HANDLERS
-  // ==========================================
-
-  // Get chat history for current client
-  http.get(`${BASE_URL}/chat/messages`, ({ request }) => {
-    const authHeader = request.headers.get("Authorization");
-    if (!authHeader) {
-      return HttpResponse.json({ message: "عدم احراز هویت" }, { status: 401 });
-    }
-
-    const token = authHeader.split(" ")[1];
-    const isLocalAdmin = token.includes("admin");
-    const userRole = isLocalAdmin ? "admin" : "client";
-    const users = getMockUsers();
-    const currentUser = users.find((u) => u.role === userRole) || users[0];
-
-    const chats = getMockChatSessions();
-    // Default chat session for user-client
-    let targetSession = chats.find((c) => c.userId === currentUser.id);
-    if (!targetSession && !isLocalAdmin) {
-      targetSession = {
-        id: `chat-${currentUser.id}`,
-        userId: currentUser.id,
-        userName: currentUser.name,
-        userEmail: currentUser.email,
+  http.post("/api/orders/:id/chat/message", async ({ params, request }) => {
+    await delay(300);
+    const body = await request.json() as any;
+    let session = chatSessions.find(s => s.orderId === params.id);
+    if (!session) {
+      session = {
+        id: "chat-" + params.id,
+        orderId: params.id.toString(),
+        customerId: "cust1", // mock fallback
         messages: [],
-        lastMessageAt: new Date().toISOString(),
-        unreadCount: 0,
+        lastUpdatedAt: new Date().toISOString()
       };
-      chats.push(targetSession);
-      saveMockChatSessions(chats);
+      chatSessions.push(session);
     }
+    const newMessage = {
+      ...body,
+      id: Math.random().toString(36).substring(7),
+      sessionId: session.id,
+      createdAt: new Date().toISOString()
+    };
+    session.messages.push(newMessage);
+    session.lastUpdatedAt = new Date().toISOString();
 
-    return HttpResponse.json(targetSession ? targetSession.messages : []);
+    return HttpResponse.json(newMessage);
   }),
 
-  // Client sending a chat message
-  http.post(`${BASE_URL}/chat/send`, async ({ request }) => {
-    try {
-      const authHeader = request.headers.get("Authorization");
-      if (!authHeader) {
-        return HttpResponse.json({ message: "عدم احراز هویت" }, { status: 401 });
-      }
-
-      const { text } = (await request.json()) as { text: string };
-      const token = authHeader.split(" ")[1];
-      const users = getMockUsers();
-      const currentUser = users.find((u) => u.role === "client") || users[0];
-
-      const chats = getMockChatSessions();
-      let targetSession = chats.find((c) => c.userId === currentUser.id);
-
-      if (!targetSession) {
-        targetSession = {
-          id: `chat-${currentUser.id}`,
-          userId: currentUser.id,
-          userName: currentUser.name,
-          userEmail: currentUser.email,
-          messages: [],
-          lastMessageAt: new Date().toISOString(),
-          unreadCount: 0,
-        };
-        chats.push(targetSession);
-      }
-
-      const newMsg: ChatMessage = {
-        id: `msg-${Date.now()}`,
-        senderId: currentUser.id,
-        senderName: currentUser.name,
-        text,
-        createdAt: new Date().toISOString(),
-        isAdmin: false,
-      };
-
-      targetSession.messages.push(newMsg);
-      targetSession.lastMessageAt = new Date().toISOString();
-      targetSession.unreadCount += 1; // Unread for admin
-
-      saveMockChatSessions(chats);
-
-      return HttpResponse.json(newMsg);
-    } catch {
-      return HttpResponse.json({ message: "خطا در پیوست پیام" }, { status: 400 });
-    }
+  // CMS
+  http.get("/api/cms/pages/:slug", async ({ params }) => {
+    await delay(300);
+    const page = cmsPages.find(p => p.slug === params.slug);
+    if (!page) return new HttpResponse(null, { status: 404 });
+    return HttpResponse.json(page);
   }),
 
-  // Admin getting all chat conversations list
-  http.get(`${BASE_URL}/admin/chat/sessions`, () => {
-    const chats = getMockChatSessions();
-    return HttpResponse.json(chats);
+  http.get("/api/cms/menus/:location", async ({ params }) => {
+    await delay(300);
+    const menu = cmsMenus.find(m => m.location === params.location);
+    if (!menu) return new HttpResponse(null, { status: 404 });
+    return HttpResponse.json(menu);
   }),
 
-  // Admin sending reply to a particular user session
-  http.post(`${BASE_URL}/admin/chat/reply`, async ({ request }) => {
-    try {
-      const { sessionId, text } = (await request.json()) as { sessionId: string; text: string };
-
-      const chats = getMockChatSessions();
-      const targetSessionIndex = chats.findIndex((c) => c.id === sessionId);
-
-      if (targetSessionIndex === -1) {
-        return HttpResponse.json({ message: "گفتگو یافت نشد" }, { status: 404 });
-      }
-
-      const newMsg: ChatMessage = {
-        id: `msg-${Date.now()}`,
-        senderId: "usr-admin",
-        senderName: "سهراب سپهری (پشتیبانی)",
-        text,
-        createdAt: new Date().toISOString(),
-        isAdmin: true,
-      };
-
-      chats[targetSessionIndex].messages.push(newMsg);
-      chats[targetSessionIndex].lastMessageAt = new Date().toISOString();
-      chats[targetSessionIndex].unreadCount = 0; // Cleared on reply
-
-      saveMockChatSessions(chats);
-      return HttpResponse.json(newMsg);
-    } catch {
-      return HttpResponse.json({ message: "ارسال پیام با شکست مواجه شد" }, { status: 400 });
-    }
+  http.get("/api/cms/sliders", async () => {
+    await delay(300);
+    return HttpResponse.json(sliders);
   }),
+
+  http.get("/api/cms/faqs", async () => {
+    await delay(300);
+    return HttpResponse.json(faqs);
+  }),
+
+  http.get("/api/blog", async () => {
+    await delay(300);
+    return HttpResponse.json(blogPosts);
+  }),
+
+  http.get("/api/blog/:slug", async ({ params }) => {
+    await delay(300);
+    const post = blogPosts.find(p => p.slug === params.slug);
+    if (!post) return new HttpResponse(null, { status: 404 });
+    return HttpResponse.json(post);
+  })
 ];

@@ -1,7 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
 import { Link } from "react-router-dom";
 import { api } from "../../../lib/api";
-import { Product } from "../../../types";
+import { Product, PaginatedResponse } from "../../../types";
 import { formatToman } from "../../../lib/persian";
 import { useStore } from "../../../lib/store";
 import { Shield, Truck, Sparkles, Clock, Paintbrush, FileCheck, ArrowUpRight } from "lucide-react";
@@ -9,13 +9,15 @@ import { Shield, Truck, Sparkles, Clock, Paintbrush, FileCheck, ArrowUpRight } f
 export default function CatalogHome() {
   const { usePersianDigits } = useStore();
 
-  const { data: products, isLoading, error } = useQuery<Product[]>({
+  const { data: productsPage, isLoading, error } = useQuery<PaginatedResponse<Product>>({
     queryKey: ["catalogProducts"],
     queryFn: async () => {
-      const res = await api.get("/catalog/products");
+      const res = await api.get("/products");
       return res.data;
     },
   });
+  
+  const products = productsPage?.data || [];
 
   return (
     <div className="flex flex-col gap-16">
@@ -155,7 +157,9 @@ export default function CatalogHome() {
           </div>
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-            {products?.map((prod) => (
+            {products.map((prod) => {
+              const basePrice = prod.pricing.type === "tier_table" ? prod.pricing.tiers[0].unitPrice : (prod.pricing.type === "formula" ? prod.pricing.basePrice : (prod.pricing.type === "area_based" ? prod.pricing.basePricePerSquareMeter : 0));
+              return (
               <div 
                 key={prod.id} 
                 className="bg-white rounded-3xl border border-slate-100 p-4 flex flex-col gap-4 shadow-sm hover:shadow-xl hover:translate-y-[-4px] transition-all group"
@@ -163,20 +167,20 @@ export default function CatalogHome() {
                 {/* Product Image */}
                 <div className="relative aspect-square overflow-hidden rounded-2xl bg-slate-50 border border-slate-100">
                   <img 
-                    src={prod.imageUrl} 
+                    src={prod.coverImage} 
                     referrerPolicy="no-referrer" 
-                    alt={prod.name}
+                    alt={prod.title}
                     className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                   />
                   <div className="absolute top-3 right-3 bg-white/95 backdrop-blur-sm shadow px-2.5 py-1 text-[11px] font-bold text-emerald-700 rounded-lg">
-                    شروع از {formatToman(prod.basePrice)}
+                    شروع از {formatToman(basePrice)}
                   </div>
                 </div>
 
                 {/* Info and action */}
                 <div className="flex flex-col gap-1.5 flex-1">
                   <h3 className="font-extrabold text-slate-800 group-hover:text-emerald-600 transition-colors text-base">
-                    {prod.name}
+                    {prod.title}
                   </h3>
                   <p className="text-xs text-slate-500 leading-relaxed line-clamp-2 h-10">
                     {prod.description}
@@ -186,7 +190,7 @@ export default function CatalogHome() {
                 <div className="pt-3 border-t border-slate-50 flex items-center justify-between gap-2 mt-auto">
                   <div className="flex flex-col">
                     <span className="text-[10px] text-slate-400">قیمت پایه</span>
-                    <span className="text-xs font-bold text-slate-700">{formatToman(prod.basePrice)}</span>
+                    <span className="text-xs font-bold text-slate-700">{formatToman(basePrice)}</span>
                   </div>
                   <Link 
                     to={`/product/${prod.id}`}
@@ -197,7 +201,7 @@ export default function CatalogHome() {
                   </Link>
                 </div>
               </div>
-            ))}
+            )})}
           </div>
         )}
       </section>
